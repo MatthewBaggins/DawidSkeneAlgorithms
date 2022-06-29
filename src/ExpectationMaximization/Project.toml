@@ -1,0 +1,4 @@
+name = "ExpectationMaximization"
+uuid = "59b70182-745f-419a-8d68-e8c873f46647"
+authors = ["matthewbaggins <m.baginski@optimumpareto.com>"]
+version = "0.1.0"
