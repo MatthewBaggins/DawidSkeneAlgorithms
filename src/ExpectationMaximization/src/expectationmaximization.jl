@@ -5,7 +5,6 @@
 using CategoricalArrays
 using Clustering
 using Distributions
-using Debugger
 using FillArrays
 using LinearAlgebra
 using Random: AbstractRNG, GLOBAL_RNG, randperm

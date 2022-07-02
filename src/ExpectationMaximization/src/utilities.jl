@@ -21,3 +21,11 @@ function diagreshufflematrix(m::Matrix{T})::Matrix{T} where T <: Real
 end
 
 issquarematrix(m::Matrix) = ==(size(m)...)
+
+function curry(f::Function, x)::Function
+    (xs...) -> f(x, xs...)
+end
+
+function equals(x)::Function
+    curry(==, x)
+end

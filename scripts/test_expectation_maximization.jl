@@ -1,28 +1,24 @@
-using DataFrames
-using RDatasets
+using Clustering
+using ExpectationMaximization
+using Test
 
-include("../src/ExpectationMaximization/src/em_kmeans_and_gmm.jl")
+include("load_datasets.jl")
+include("evaluate.jl")
 
 function main()
     # Setup and data
-    alg = KMeans()
-    iris = dataset("datasets", "iris")
-    x = select(iris, Not(:Species)) |> Matrix
-    y_labels = iris.Species |> Vector{String}
-    
-    # Algorithm
-    μ_history, r_history = em(alg, x, n_steps=100)
-    y_preds = r_history[end]
-    
-    # Evaluation
-    evaluate(tocategorical(y_preds), tocategorical(y_labels))
-end
-
-function evaluate(y_preds::Vector{Int}, y_labels::Vector{Int})
-    println("Mutual information: $(round(mutualinfo(y_preds, y_labels), digits = 3))")
-    println("Counts matrix [ predicted × true labels ]")
-    countmat = diagreshufflematrix(counts(y_preds, y_labels))
-    display(countmat)
+    algs = [KMeans(), GMM()]
+    iris_x, iris_y = load_iris()
+    for alg in algs    
+        # Algorithm
+        μ_history, r_history = em(alg, iris_x, n_steps=100)
+        iris_pred = tocategorical(r_history[end])
+        # Evaluation
+        mi = round(mutualinfo(iris_pred, iris_y), digits=3)
+        @test mi > .5
+        println("alg: $alg:\tMI ≈ $mi")
+        # evaluate(iris_pred, iris_y)
+    end
 end
 
 main()

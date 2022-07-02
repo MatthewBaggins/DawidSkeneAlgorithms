@@ -1,5 +1,11 @@
 # gsoc_2022_turing
 
+## TODO
+
+iterate over algs and datasets, test for MI threshold
+
+## else
+
 This code base is using the Julia Language and [DrWatson](https://juliadynamics.github.io/DrWatson.jl/stable/)
 to make a reproducible scientific project named
 > gsoc_2022_turing
