@@ -17,7 +17,6 @@ function main()
         mi = round(mutualinfo(iris_pred, iris_y), digits=3)
         @test mi > .5
         println("alg: $alg:\tMI ≈ $mi")
-        # evaluate(iris_pred, iris_y)
     end
 end
 

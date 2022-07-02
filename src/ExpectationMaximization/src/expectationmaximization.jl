@@ -28,13 +28,13 @@ struct GMM <: AbstractMixtureModel end
 #             KMeans               #
 ####################################
 
-θ_KMeans = Matrix{Float64}
+θ_KMeans = Matrix{<:Real}
 r_KMeans = Vector{Int}
 
 function init_θ(
     ::KMeans, 
     rng::AbstractRNG, 
-    x::Matrix{Float64}, 
+    x::Matrix{<:Real}, 
     k::Int
 )::θ_KMeans
 
@@ -45,18 +45,18 @@ function init_θ(
     return θ
 end
 
-function e_step(alg::KMeans, x::Matrix{Float64}, θ::θ_KMeans)::r_KMeans
+function e_step(alg::KMeans, x::Matrix{<:Real}, θ::θ_KMeans)::r_KMeans
     μ = θ
     mapslices(xᵢ -> compute_r(alg, xᵢ, μ), x; dims = 2)[:]
 end
 
-function compute_r(::KMeans, xᵢ::Vector{Float64}, μ::Matrix{Float64})::Int
+function compute_r(::KMeans, xᵢ::Vector{<:Real}, μ::Matrix{<:Real})::Int
     mapslices(μᵢ -> norm(μᵢ - xᵢ), μ; dims = 2)[:] |> argmin
 end
 
 function m_step(
     ::KMeans,
-    x::Matrix{Float64},
+    x::Matrix{<:Real},
     r::Vector{Int},
     θ::θ_KMeans
 )::θ_KMeans
@@ -77,13 +77,13 @@ end
 #             GMM                  #
 ####################################
 
-θ_GMM = Tuple{Vector{Float64}, Vector{MvNormal}} # Π, MvNormal
-r_GMM = Matrix{Float64}
+θ_GMM = Tuple{Vector{<:Real}, Vector{MvNormal}} # Π, MvNormal
+r_GMM = Matrix{<:Real}
 
 function init_θ(
     ::GMM, 
     rng::AbstractRNG, 
-    x::Matrix{Float64}, 
+    x::Matrix{<:Real}, 
     k::Int
 )::θ_GMM
 
@@ -95,7 +95,7 @@ function init_θ(
     return θ
 end
 
-function e_step(alg::GMM, x::Matrix{Float64}, θ::θ_GMM)::r_GMM
+function e_step(alg::GMM, x::Matrix{<:Real}, θ::θ_GMM)::r_GMM
     Π, 𝓝 = θ
     K = length(Π)
     r = mapslices(xᵢ -> compute_r(alg, xᵢ, Π, 𝓝, K), x; dims = 2)
@@ -104,11 +104,11 @@ end
 
 function compute_r(
     ::GMM,
-    xᵢ::Vector{Float64}, 
-    Π::Vector{Float64}, 
+    xᵢ::Vector{<:Real}, 
+    Π::Vector{<:Real}, 
     𝓝::Vector{MvNormal}, 
     K::Int
-)::Vector{Float64}
+)::Vector{<:Real}
 
     r = [Π[k] * pdf(𝓝[k], xᵢ) for k in 1:K]
     return r /= sum(r)
@@ -116,8 +116,8 @@ end
 
 function m_step(
     ::GMM, 
-    x::Matrix{Float64}, 
-    r::Matrix{Float64}, 
+    x::Matrix{<:Real}, 
+    r::Matrix{<:Real}, 
     θ::θ_GMM
 )::θ_GMM
 
@@ -135,13 +135,13 @@ end
 
 #TODO: functionalize
 function compute_new_μ(
-    x::Matrix{Float64}, 
-    r::Matrix{Float64}, 
+    x::Matrix{<:Real}, 
+    r::Matrix{<:Real}, 
     N::Int, 
     D::Int, 
     K::Int, 
-    Nₖ::Vector{Float64}
-)::Matrix{Float64}
+    Nₖ::Vector{<:Real}
+)::Matrix{<:Real}
 
     new_μ = zeros(K, D)
     for k in 1:K
@@ -152,25 +152,25 @@ function compute_new_μ(
 end
 
 function compute_new_Σ(
-    x::Matrix{Float64}, 
-    new_μ::Matrix{Float64}, 
-    r::Matrix{Float64}, 
+    x::Matrix{<:Real}, 
+    new_μ::Matrix{<:Real}, 
+    r::Matrix{<:Real}, 
     N::Int, 
     K::Int, 
-    Nₖ::Vector{Float64}
-)::Vector{Matrix{Float64}}
+    Nₖ::Vector{<:Real}
+)::Vector{Matrix{<:Real}}
 
-    new_Σ::Vector{Matrix{Float64}} = []
+    new_Σ = []
     for k in 1:K
         new_Σₖ = Hermitian(sum([r[n, k] * (x[n, :] - new_μ[k, :]) * transpose(x[n, :] - new_μ[k, :])  #TODO: tranpose with '
                                 for n in 1:N]) / Nₖ[k])
-        push!(new_Σ, new_Σₖ)
+        push!(new_Σ, convert(Matrix{Float64}, new_Σₖ))
     end
     return new_Σ
 
 end
 
-function compute_new_Π(N::Int, Nₖ::Vector{Float64})::Vector{Float64}
+function compute_new_Π(N::Int, Nₖ::Vector{<:Real})::Vector{<:Real}
     [Nₖ[k] / N for k in 1:length(Nₖ)]
 end
 
@@ -180,11 +180,10 @@ end
 
 function em(
     alg::AbstractMixtureModel, 
-    x::Matrix{Float64};
+    x::Matrix{<:Real};
     k::Int=3,
     n_steps::Int=10
 )::Tuple{Vector, Vector}
-
     θ = init_θ(alg, GLOBAL_RNG, x, k)
     r_history = []
     θ_history = []

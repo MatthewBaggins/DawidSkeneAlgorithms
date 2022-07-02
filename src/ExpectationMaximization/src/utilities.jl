@@ -3,11 +3,11 @@ function tocategorical(x::Vector)::Vector{Int}
     return [x2cat[val] for val in x]
 end
 
-function tocategorical(x::Matrix{Float64})::Vector{Int}
+function tocategorical(x::Matrix{<:AbstractFloat})::Vector{Int}
     mapslices(argmax, x, dims = 2)[:] 
 end
 
-tocategorical(x::Vector{Int}) = x
+tocategorical(x::Vector{<:Integer}) = x
 
 function diagreshufflematrix(m::Matrix{T})::Matrix{T} where T <: Real
     @assert issquarematrix(m)
@@ -26,6 +26,4 @@ function curry(f::Function, x)::Function
     (xs...) -> f(x, xs...)
 end
 
-function equals(x)::Function
-    curry(==, x)
-end
+equals(x) = curry(==, x)
