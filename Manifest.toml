@@ -335,7 +335,7 @@ uuid = "cad2338a-1db2-11e9-3401-43bc07c9ede2"
 version = "1.0.0"
 
 [[deps.ExpectationMaximization]]
-deps = ["CategoricalArrays", "Clustering", "Distributions", "FillArrays", "LinearAlgebra", "RDatasets", "Random", "Statistics", "StatsBase", "Test"]
+deps = ["CSV", "CategoricalArrays", "Clustering", "DataFrames", "Distributions", "FillArrays", "LinearAlgebra", "RDatasets", "Random", "Revise", "Statistics", "StatsBase", "Test"]
 path = "src/ExpectationMaximization"
 uuid = "549e6e06-ea84-4a1c-8465-9d79e18916dc"
 version = "0.1.0"

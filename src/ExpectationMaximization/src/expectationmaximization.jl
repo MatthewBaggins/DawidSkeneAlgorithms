@@ -19,10 +19,26 @@ include("utilities.jl")
 ####################################
 
 abstract type AbstractMixtureModel end
+AMM = AbstractMixtureModel
 
-struct KMeans <: AbstractMixtureModel end
+struct KMeans <: AMM end
 
-struct GMM <: AbstractMixtureModel end
+struct GMM <: AMM end
+
+abstract type AbstractDawidSkene end
+ADS = AbstractDawidSkene
+
+struct FastDawidSkene <: ADS end
+FDS = FastDawidSkene
+
+struct DawidSkene <: ADS end
+DS = DawidSkene
+
+struct HybridDawidSkene <: ADS end
+HDS = HybridDawidSkene
+
+struct MajorityVoting end
+MV = MajorityVoting
 
 ####################################
 #             KMeans               #
@@ -128,7 +144,7 @@ function m_step(
     new_μ = compute_new_μ(x, r, N, D, K, Nₖ)
     new_Σ = compute_new_Σ(x, new_μ, r, N, K, Nₖ)
     new_Π = compute_new_Π(N, Nₖ)
-    new_𝓝 = [MvNormal(new_μ[k, :], new_Σ[k]) for k in 1:K]
+    new_𝓝 = [MvNormal(new_μ[k, :], Hermitian(new_Σ[k])) for k in 1:K]
     new_θ = (new_Π, new_𝓝)
     return new_θ
 end

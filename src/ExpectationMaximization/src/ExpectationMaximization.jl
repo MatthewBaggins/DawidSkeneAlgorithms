@@ -2,6 +2,6 @@ module ExpectationMaximization
 
 include("expectationmaximization.jl")
 
-export KMeans, GMM, em, diagreshufflematrix, tocategorical
+export AMM, KMeans, GMM, em, diagreshufflematrix, tocategorical, ADS, FDS
 
 end # module
