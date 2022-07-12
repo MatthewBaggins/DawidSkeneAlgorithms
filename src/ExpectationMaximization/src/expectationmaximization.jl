@@ -18,14 +18,20 @@ include("utilities.jl")
 #             Abstract             #
 ####################################
 
-abstract type AbstractMixtureModel end
+abstract type AbstractEMAlgorithm end
+
+# Mixture model algorithms
+
+abstract type AbstractMixtureModel <: AbstractEMAlgorithm end
 AMM = AbstractMixtureModel
 
 struct KMeans <: AMM end
 
 struct GMM <: AMM end
 
-abstract type AbstractDawidSkene end
+# Dawid Skene algorithms
+
+abstract type AbstractDawidSkene <: AbstractEMAlgorithm end
 ADS = AbstractDawidSkene
 
 struct FastDawidSkene <: ADS end
@@ -37,7 +43,9 @@ DS = DawidSkene
 struct HybridDawidSkene <: ADS end
 HDS = HybridDawidSkene
 
-struct MajorityVoting end
+# Other
+
+struct MajorityVoting <: AbstractEMAlgorithm end
 MV = MajorityVoting
 
 ####################################
@@ -127,7 +135,11 @@ function compute_r(
 )::Vector{<:Real}
 
     r = [Π[k] * pdf(𝓝[k], xᵢ) for k in 1:K]
-    return r /= sum(r)
+
+    if sum(r) > 0
+        return r / sum(r)
+    end
+    return r
 end
 
 function m_step(
@@ -144,7 +156,7 @@ function m_step(
     new_μ = compute_new_μ(x, r, N, D, K, Nₖ)
     new_Σ = compute_new_Σ(x, new_μ, r, N, K, Nₖ)
     new_Π = compute_new_Π(N, Nₖ)
-    new_𝓝 = [MvNormal(new_μ[k, :], Hermitian(new_Σ[k])) for k in 1:K]
+    new_𝓝 = [MvNormal(new_μ[k, :], new_Σ[k] + I * 1e-7) for k in 1:K]
     new_θ = (new_Π, new_𝓝)
     return new_θ
 end

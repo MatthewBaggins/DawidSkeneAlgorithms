@@ -2,6 +2,7 @@ using Revise
 
 using Clustering
 using ExpectationMaximization
+import ExpectationMaximization: em
 using Test
 
 include("load_datasets.jl")
@@ -17,7 +18,7 @@ datasets = [load_iris(), load_beans(), load_stars()]
 function main()
     # Setup and data
     algs = [KMeans(), GMM()]
-    # iris_x, iris_y = load_iris()
+    
     for dataset in datasets
         println("Dataset: $(dataset.name)")
         for alg in algs
@@ -32,4 +33,4 @@ function main()
     end
 end
 
-# main()
+main()
