@@ -8,7 +8,7 @@ using Test
 include("load_datasets.jl")
 include("evaluate.jl")
 
-function em(alg::ExpectationMaximization.AMM, dataset::Dataset; n_steps::Int = 10)
+function em(alg::ExpectationMaximization.AMM, dataset::DatasetClustering; n_steps::Int = 10)
     K = length(unique(dataset.y))
     μ_history, r_history = ExpectationMaximization.em(alg, dataset.x; k = K, n_steps = n_steps)
 end

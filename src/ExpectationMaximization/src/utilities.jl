@@ -27,3 +27,28 @@ function curry(f::Function, x)::Function
 end
 
 equals(x) = curry(==, x)
+
+function argwhere(xs, condition)
+    [i for (i, x) in enumerate(xs) if condition(x)]
+end
+
+function responses_to_counts(responses::DataFrame)::AbstractArray{<:Real, 3}
+    participants = responses[!, 1] |> unique |> Vector
+    questions = responses[!, 2] |> unique |> Vector
+    classes = responses[!, 3] |> unique |> Vector
+    
+    counts = zeros(length(questions), length(participants), length(classes))
+    for (q_i, q) in enumerate(questions)
+        for (p_i, p) in enumerate(participants)
+            for (c_i, c) in enumerate(classes)
+                counts[q_i, p_i, c_i], _ = filter(
+                    r -> (r[1] == p && 
+                          r[2] == q && 
+                          r[3] == c), 
+                    responses
+                    ) |> size
+            end
+        end
+    end
+    return counts
+end
