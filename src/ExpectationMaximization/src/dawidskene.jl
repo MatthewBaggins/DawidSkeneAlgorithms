@@ -52,18 +52,16 @@ function m_step(
     return class_marginals, error_rates
 end
 
-#####################################################
-#         E-Steps (depend on alg variation)         #
-#####################################################
-
-# Fast Dawid-Skene
+#########################
+#         E-Step        #
+#########################
 
 function e_step(
-    ::FDS,
+    alg::ADS, # FDS,
     counts,
     class_marginals, 
     error_rates
-)
+    )
     nQuestions, nParticipants, nClasses = size(counts)
     question_classes = zeros(nQuestions, nClasses)
     final_classes = zeros(nQuestions, nClasses)
@@ -72,37 +70,36 @@ function e_step(
             estimate = class_marginals[j] * prod(error_rates[:, j, :] .^ counts[i, :, :])
             question_classes[i, j] = estimate
         end
-        # if mode ...
-        maxval = maximum(question_classes[i, :])
-        maxinds = argwhere(question_classes[i, :], ==(maxval))
-        final_classes[i, sample(maxinds, 1)[1]] = 1
+        _e_step_estimate_classes!(alg, i, question_classes, final_classes)
     end
-    return final_classes
+    return alg == FDS() ? final_classes : question_classes # DS / HDS
 end
 
-# Normal Dawid-Skene
-# Hybrid Dawid-Skene
+##########################################################################################
+#         E-Step class estimation - the only part that differs between algorithms        #
+##########################################################################################
 
-function e_step(
-    ::Union{DS, HDS},
-    counts,
-    class_marginals, 
-    error_rates
+function _e_step_estimate_classes!(
+    ::FDS,
+    i,
+    question_classes,
+    final_classes
 )
-    nQuestions, nParticipants, nClasses = size(counts)
-    question_classes = zeros(nQuestions, nClasses)
-    final_classes = zeros(nQuestions, nClasses)
-    for i in 1:nQuestions
-        for j in 1:nClasses
-            estimate = class_marginals[j] * prod(error_rates[:, j, :] .^ counts[i, :, :])
-            question_classes[i, j] = estimate
-        end
-        question_sum = sum(question_classes[i, :])
-        if question_sum > 0
-            question_classes[i, :] .= sum(question_classes[i, :]) / question_sum
-        end
+    maxval = maximum(question_classes[i, :])
+    maxinds = argwhere(question_classes[i, :], ==(maxval))
+    final_classes[i, sample(maxinds, 1)[1]] = 1
+end
+
+function _e_step_estimate_classes!(
+    ::Union{DS, HDS},
+    i,
+    question_classes,
+    final_classes
+)
+    question_sum = sum(question_classes[i, :])
+    if question_sum > 0
+        question_classes[i, :] = question_classes[i, :] / question_sum
     end
-    return question_classes
 end
 
 ####################################
