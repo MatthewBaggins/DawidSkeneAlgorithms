@@ -3,10 +3,8 @@
 ####################################
 
 struct KMeans <: AMM end
-Base.show(io::IO, ::KMeans) = print(io, "KMeans")
 
 struct GMM <: AMM end
-Base.show(io::IO, ::GMM) = print(io, "GMM")
 
 const CLUSTERING_ALGORITHMS = [KMeans(), GMM()]
 

@@ -22,7 +22,8 @@ end
 function initialize_question_classes(
     ::Union{FDS, MV},
     counts::Array{<:Real, 3}
-)
+)::AbstractArray{<:Real, 2}
+
     nQuestions, nParticipants, nClasses = size(counts)
     response_sums = reshape(sum(counts, dims = 2), (nQuestions, nClasses))    
     question_classes = zeros(nQuestions, nClasses)
@@ -37,7 +38,8 @@ end
 function initialize_question_classes(
     ::AbstractEMAlgorithm,
     counts::Array{<:Real, 3}
-)
+)::AbstractArray{<:Real, 2}
+
     nQuestions, nParticipants, nClasses = size(counts)
     response_sums = reshape(sum(counts, dims = 2), (nQuestions, nClasses))
     question_classes = zeros(nQuestions, nClasses)

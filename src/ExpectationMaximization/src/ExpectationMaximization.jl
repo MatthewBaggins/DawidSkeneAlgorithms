@@ -33,6 +33,16 @@ const ADS = AbstractDawidSkene
 include("mixturemodels.jl")
 include("dawidskene.jl")
 
+for alg in vcat(CLUSTERING_ALGORITHMS, VOTING_ALGORITHMS)
+    alg_type = typeof(alg)
+    @show alg_type
+    alg_name = split("$alg_type", ".")[end]
+    @eval function Base.show(io::IO, ::$alg_type)
+        print(io, $alg_name)
+    end
+end
+
+
 export AMM, KMeans, GMM, em, diagreshufflematrix, tocategorical, ADS, FDS, CLUSTERING_ALGORITHMS, VOTING_ALGORITHMS
 
 end # module

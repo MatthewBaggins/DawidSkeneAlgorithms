@@ -4,19 +4,15 @@
 
 struct FastDawidSkene <: ADS end
 const FDS = FastDawidSkene
-Base.show(io::IO, ::FDS) = print(io, "FastDawidSkene")
 
 struct DawidSkene <: ADS end
 const DS = DawidSkene
-Base.show(io::IO, ::DS) = print(io, "DawidSkene")
 
 struct HybridDawidSkene <: ADS end
 const HDS = HybridDawidSkene
-Base.show(io::IO, ::HDS) = print(io, "HybridDawidSkene")
 
 struct MajorityVoting <: AbstractEMAlgorithm end
 const MV = MajorityVoting
-Base.show(io::IO, ::MV) = print(io, "MajorityVoting")
 
 const VOTING_ALGORITHMS = [FDS(), DS(), HDS(), MV()]
 
@@ -32,9 +28,10 @@ include("dawidskene_utilities.jl")
 
 function m_step(
     ::ADS,
-    counts, 
-    question_classes
-)
+    counts::AbstractArray{<:Real, 3},
+    question_classes::AbstractArray{<:Real, 2}
+)::Tuple{AbstractArray{<:Real, 2}, AbstractArray{<:Real, 3}} # class_marginals, error_rates
+
     nQuestions, nParticipants, nClasses = size(counts)
     class_marginals = sum(question_classes, dims = 1) ./ nQuestions
     error_rates = zeros(nParticipants, nClasses, nClasses)
@@ -58,10 +55,11 @@ end
 
 function e_step(
     alg::ADS, # FDS,
-    counts,
-    class_marginals, 
-    error_rates
-    )
+    counts::AbstractArray{<:Real, 3},
+    class_marginals::AbstractArray{<:Real, 2},
+    error_rates::AbstractArray{<:Real, 3}
+)::AbstractArray{<:Real, 2} # question_classes / final_classes
+
     nQuestions, nParticipants, nClasses = size(counts)
     question_classes = zeros(nQuestions, nClasses)
     final_classes = zeros(nQuestions, nClasses)
@@ -81,25 +79,29 @@ end
 
 function _e_step_estimate_classes!(
     ::FDS,
-    i,
-    question_classes,
-    final_classes
-)
+    i::Int,
+    question_classes::AbstractArray{<:Real, 2},
+    final_classes::AbstractArray{<:Real, 2}
+)::Nothing
+
     maxval = maximum(question_classes[i, :])
     maxinds = argwhere(question_classes[i, :], ==(maxval))
     final_classes[i, sample(maxinds, 1)[1]] = 1
+    return
 end
 
 function _e_step_estimate_classes!(
     ::Union{DS, HDS},
-    i,
-    question_classes,
-    final_classes
-)
+    i::Int,
+    question_classes::AbstractArray{<:Real, 2},
+    final_classes::AbstractArray{<:Real, 2}
+)::Nothing
+
     question_sum = sum(question_classes[i, :])
     if question_sum > 0
         question_classes[i, :] = question_classes[i, :] / question_sum
     end
+    return
 end
 
 ####################################
@@ -134,11 +136,10 @@ function em(
         if old_class_marginals ≠ nothing
             class_marginals_diff = sum(abs.(class_marginals - old_class_marginals))
             error_rates_diff = sum(abs.(error_rates - old_error_rates))
-            # if verbose 
             if class_marginals_diff < tol || nIter >= max_iter
                 converged = true
-            end #elif mode == "H"
-        end # else if verbose
+            end
+        end
         old_class_marginals = class_marginals
         old_error_rates = error_rates
         if verbosity == VERBOSE
@@ -154,12 +155,11 @@ end
 function em(
     alg::MV,
     counts::AbstractArray{<:Real, 3};
-    tol = .0001,
-    CM_tol = .005,
-    max_iter = 100,
-    verbose::Bool = true
+    verbose::Verbosity = NORMAL,
+    kwargs...
 )
     question_classes = initialize_question_classes(alg, counts)
-    return argmax(question_classes, dims = 2)
+    result = argmax(question_classes, dims = 2)
+    verbose ≠ SILENT && @show result
+    return result
 end
-

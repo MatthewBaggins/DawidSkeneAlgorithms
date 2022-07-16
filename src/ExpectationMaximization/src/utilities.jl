@@ -13,7 +13,7 @@ function diagreshufflematrix(m::Matrix{T})::Matrix{T} where T <: Real
     @assert issquarematrix(m)
     D, _ = size(m)
     maxs = [argmax(m[:, d]) for d in 1:D]
-    if length(unique(maxs)) != D
+    if length(unique(maxs)) ≠ D
         return m
     end
     new_m = permutedims(hcat([m[i, :] for i in maxs]...))
