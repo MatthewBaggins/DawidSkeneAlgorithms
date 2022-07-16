@@ -10,6 +10,7 @@ const DS = DawidSkene
 
 struct HybridDawidSkene <: ADS end
 const HDS = HybridDawidSkene
+struct HDS_phase2 <: ADS end
 
 struct MajorityVoting <: AbstractEMAlgorithm end
 const MV = MajorityVoting
@@ -22,9 +23,9 @@ const VOTING_ALGORITHMS = [FDS(), DS(), HDS(), MV()]
 
 include("dawidskene_utilities.jl")
 
-##############################################
-#      M-Step (same for all variations)      #
-##############################################
+####################################
+#             M-Step               #
+####################################
 
 function m_step(
     ::ADS,
@@ -49,12 +50,14 @@ function m_step(
     return class_marginals, error_rates
 end
 
-#########################
-#         E-Step        #
-#########################
+####################################
+#             E-Step               #
+####################################
+
+# Common core
 
 function e_step(
-    alg::ADS, # FDS,
+    alg::ADS,
     counts::AbstractArray{<:Real, 3},
     class_marginals::AbstractArray{<:Real, 2},
     error_rates::AbstractArray{<:Real, 3}
@@ -70,15 +73,18 @@ function e_step(
         end
         _e_step_estimate_classes!(alg, i, question_classes, final_classes)
     end
-    return alg == FDS() ? final_classes : question_classes # DS / HDS
+
+    if typeof(alg) ∈ [DS, HDS]
+        return question_classes
+    else # FDS / HDS_phase2
+        return final_classes
+    end
 end
 
-##########################################################################################
-#         E-Step class estimation - the only part that differs between algorithms        #
-##########################################################################################
+# Class estimation -- the only part that differs between algorithms
 
 function _e_step_estimate_classes!(
-    ::FDS,
+    ::Union{FDS, HDS_phase2},
     i::Int,
     question_classes::AbstractArray{<:Real, 2},
     final_classes::AbstractArray{<:Real, 2}
@@ -116,7 +122,7 @@ function em(
     tol = .0001,
     CM_tol = .005,
     max_iter = 100,
-    verbosity::Verbosity = NORMAL
+    verbosity::Verbosity = SILENT
 )
     # Initialize
     question_classes = initialize_question_classes(alg, counts)
@@ -124,7 +130,6 @@ function em(
     converged = false
     old_class_marginals = nothing
     old_error_rates = nothing
-    # total_time = 0
     log_L = nothing
     while !converged
         nIter += 1
@@ -138,6 +143,8 @@ function em(
             error_rates_diff = sum(abs.(error_rates - old_error_rates))
             if class_marginals_diff < tol || nIter >= max_iter
                 converged = true
+            elseif alg isa HDS && class_marginals_diff ≤ CM_tol
+                alg = HDS_phase2()
             end
         end
         old_class_marginals = class_marginals
@@ -149,6 +156,7 @@ function em(
     end
     verbosity == NORMAL && @show log_L
     result = @pipe argmax(question_classes, dims = 2)[:] |> map(x -> x[2], _)
+    return result, log_L
 end
 
 

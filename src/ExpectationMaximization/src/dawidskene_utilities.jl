@@ -36,7 +36,7 @@ function initialize_question_classes(
 end
 
 function initialize_question_classes(
-    ::AbstractEMAlgorithm,
+    ::Union{DS, HDS},
     counts::Array{<:Real, 3}
 )::AbstractArray{<:Real, 2}
 

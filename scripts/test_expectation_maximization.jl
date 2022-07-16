@@ -5,7 +5,7 @@ using ExpectationMaximization
 import ExpectationMaximization: em
 using Test
 
-include("load_datasets.jl")
+include("../src/load_datasets.jl")
 include("evaluate.jl")
 
 function em(alg::ExpectationMaximization.AMM, dataset::DatasetClustering; n_steps::Int = 10)

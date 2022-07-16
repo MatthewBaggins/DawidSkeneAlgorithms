@@ -43,9 +43,7 @@ function convert_responses_to_counts(path::String)::AbstractArray{<:Real, 3}
         for (p_i, p) in enumerate(participants)
             for (c_i, c) in enumerate(classes)
                 counts[q_i, p_i, c_i], _ = filter(
-                    r -> (r[1] == p && 
-                          r[2] == q && 
-                          r[3] == c), 
+                    r -> (r[1] == p && r[2] == q && r[3] == c), 
                     responses
                     ) |> size
             end
