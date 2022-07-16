@@ -42,16 +42,25 @@ struct DatasetVoting
 end
 
 function load_adult2()::DatasetVoting
-    DatasetVoting("adult2",
+    DatasetVoting(
+        "adult2",
         load("data/adult2_dataset/crowd_counts.jld")["crowd_counts"],
         CSV.read("data/adult2_dataset/gold.csv", DataFrame, header=false)
     )
 end
 
 function load_rte()::DatasetVoting
-    DatasetVoting("rte",
+    DatasetVoting(
+        "rte",
         load("data/rte_dataset/crowd_counts.jld")["crowd_counts"],
         CSV.read("data/rte_dataset/gold.csv", DataFrame, header=false)
     )
 end
 
+function load_toy()::DatasetVoting
+    DatasetVoting(
+        "toy",
+        load("data/toy_dataset/crowd_counts.jld")["crowd_counts"],
+        CSV.read("data/toy_dataset/gold.csv", DataFrame, header=false)
+    )
+end

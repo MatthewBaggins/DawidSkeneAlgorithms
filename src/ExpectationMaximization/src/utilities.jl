@@ -32,7 +32,8 @@ function argwhere(xs, condition)
     [i for (i, x) in enumerate(xs) if condition(x)]
 end
 
-function responses_to_counts(responses::DataFrame)::AbstractArray{<:Real, 3}
+function convert_responses_to_counts(path::String)::AbstractArray{<:Real, 3}
+    responses = CSV.read(path, DataFrame)
     participants = responses[!, 1] |> unique |> Vector
     questions = responses[!, 2] |> unique |> Vector
     classes = responses[!, 3] |> unique |> Vector
