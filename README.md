@@ -1,9 +1,3 @@
-# Setup instructions
+# gsoc_2022_turing
 
-# TODO
-
-## notebook
-
-whence HDS_phase2
-
-switch verbosity
+[showcase.ipynb](./notebooks/showcase.ipynb) explains the algorithm step-by-step.
