@@ -147,15 +147,19 @@ function em(
                 alg = HDS_phase2()
             end
         end
+
         old_class_marginals = class_marginals
         old_error_rates = error_rates
+        
         if verbosity == VERBOSE
             @show nIter
             @show log_L
         end
     end
-    verbosity == NORMAL && @show log_L
-    result = @pipe argmax(question_classes, dims = 2)[:] |> map(x -> x[2], _)
+    verbosity != SILENT && @show log_L
+    result = map(
+        x -> x[2], 
+        argmax(question_classes, dims = 2)[:])
     return result, log_L
 end
 

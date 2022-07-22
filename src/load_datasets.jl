@@ -41,6 +41,15 @@ struct DatasetVoting
     gold::DataFrame #TODO: 1. change to something more sensible; 2. use in eval; 3. document conversion
 end
 
+function show(io::IO, ds::DatasetVoting)
+    println(io, 
+    """DatasetVoting:
+        name: $(ds.name)
+        crowd_counts: $(size(ds.crowd_counts))
+        gold: $(size(ds.gold))"""
+        )
+end
+
 function load_adult2()::DatasetVoting
     DatasetVoting(
         "adult2",

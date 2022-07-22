@@ -21,7 +21,7 @@ end
 
 function initialize_question_classes(
     ::Union{FDS, MV},
-    counts::Array{<:Real, 3}
+    counts::AbstractArray{<:Real, 3}
 )::AbstractArray{<:Real, 2}
 
     nQuestions, nParticipants, nClasses = size(counts)
@@ -37,7 +37,7 @@ end
 
 function initialize_question_classes(
     ::Union{DS, HDS},
-    counts::Array{<:Real, 3}
+    counts::AbstractArray{<:Real, 3}
 )::AbstractArray{<:Real, 2}
 
     nQuestions, nParticipants, nClasses = size(counts)
