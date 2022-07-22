@@ -17,9 +17,9 @@ function main()
             println("Dataset:\t$(dataset.name)")
             println("Algorithm:\t$alg")
             println("Time:")
-            # result, log_L = em(alg, dataset.crowd_counts)
-            result, log_L = @btime em($alg, $(dataset.crowd_counts)) seconds=5
-            println("Log-likelihood: $log_L")
+            # result, negloglik = em(alg, dataset.crowd_counts)
+            result, negloglik = @btime em($alg, $(dataset.crowd_counts)) seconds=5
+            println("Negative log-likelihood: $negloglik")
         end
     end
 end

@@ -1,6 +1,6 @@
-function calc_likelihood(::ADS, counts, class_marginals, error_rates)
+function calculate_negloglikelihood(::ADS, counts, class_marginals, error_rates)
     nPatients, nObservers, nClasses = size(counts)
-    log_L = 0.0
+    loglikelihood = 0.0
     
     for i in 1:nPatients
         patient_likelihood = 0.0
@@ -10,13 +10,13 @@ function calc_likelihood(::ADS, counts, class_marginals, error_rates)
             patient_class_posterior = class_prior * patient_class_likelihood
             patient_likelihood += patient_class_posterior
         end 
-        temp = log_L + log(patient_likelihood)
+        temp = loglikelihood + log(patient_likelihood)
         if isnan(temp) || isnothing(temp) || isinf(temp)
             error("Invalid temp value: $temp")
         end
-        log_L = temp
+        loglikelihood = temp
     end
-    return log_L
+    return -loglikelihood
 end
 
 function initialize_question_classes(

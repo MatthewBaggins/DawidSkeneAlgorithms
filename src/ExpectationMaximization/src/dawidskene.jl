@@ -130,12 +130,12 @@ function em(
     converged = false
     old_class_marginals = nothing
     old_error_rates = nothing
-    log_L = nothing
+    negloglik = nothing
     while !converged
         nIter += 1
         class_marginals, error_rates = m_step(alg, counts, question_classes)
         question_classes = e_step(alg, counts, class_marginals, error_rates)
-        log_L = calc_likelihood(alg, counts, class_marginals, error_rates)
+        negloglik = calculate_negloglikelihood(alg, counts, class_marginals, error_rates)
         
         # Check for convergence
         if old_class_marginals ≠ nothing
@@ -153,14 +153,14 @@ function em(
         
         if verbosity == VERBOSE
             @show nIter
-            @show log_L
+            @show negloglik
         end
     end
-    verbosity != SILENT && @show log_L
+    verbosity != SILENT && @show negloglik
     result = map(
         x -> x[2], 
         argmax(question_classes, dims = 2)[:])
-    return result, log_L
+    return result, negloglik
 end
 
 
