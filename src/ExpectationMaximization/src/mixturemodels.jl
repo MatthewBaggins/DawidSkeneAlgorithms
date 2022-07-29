@@ -88,17 +88,16 @@ end
 
 function compute_r(
     ::GMM,
-    xᵢ::Vector{<:Real}, 
-    Π::Vector{<:Real}, 
-    𝓝::Vector{MvNormal}, 
+    xᵢ::Vector{<:Real},
+    Π::Vector{<:Real},
+    𝓝::Vector{MvNormal},
     K::Int
     )::Vector{<:Real}
     
     r = [Π[k] * pdf(𝓝[k], xᵢ) for k in 1:K]
     
-    if sum(r) > 0
-        return r / sum(r)
-    end
+    sum(r) > 0 && return r / sum(r)
+
     return r
 end
 
