@@ -69,7 +69,7 @@ function init_θ(
     rng::AbstractRNG, 
     x::Matrix{<:Real}, 
     k::Int
-    )::θ_GMM
+)::θ_GMM
     
     N, D = size(x)
     μ_inds = randperm(rng, N)[1:k]
@@ -92,7 +92,7 @@ function compute_r(
     Π::Vector{<:Real},
     𝓝::Vector{MvNormal},
     K::Int
-    )::Vector{<:Real}
+)::Vector{<:Real}
     
     r = [Π[k] * pdf(𝓝[k], xᵢ) for k in 1:K]
     
@@ -106,7 +106,7 @@ function m_step(
     x::Matrix{<:Real}, 
     r::Matrix{<:Real}, 
     θ::θ_GMM
-    )::θ_GMM
+)::θ_GMM
 
     Π, _ = θ
     K = length(Π)
@@ -128,7 +128,7 @@ function compute_new_μ(
     D::Int, 
     K::Int, 
     Nₖ::Vector{<:Real}
-    )::Matrix{<:Real}
+)::Matrix{<:Real}
 
     new_μ = zeros(K, D)
     for k in 1:K
@@ -145,7 +145,7 @@ function compute_new_Σ(
     N::Int, 
     K::Int, 
     Nₖ::Vector{<:Real}
-    )::Vector{Matrix{<:Real}}
+)::Vector{Matrix{<:Real}}
     
     new_Σ = []
     for k in 1:K

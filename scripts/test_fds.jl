@@ -13,13 +13,11 @@ datasets = [load_adult2(), load_rte()]
 function main()
     # Setup and data
     for dataset in datasets
-        for alg in VOTING_ALGORITHMS[1:end-1] # no MV (for now)
-            println("Dataset:\t$(dataset.name)")
-            println("Algorithm:\t$alg")
-            println("Time:")
-            # result, negloglik = em(alg, dataset.crowd_counts)
+        println("\n=== Dataset: $(dataset.name) ===")
+        for alg in VOTING_ALGORITHMS
+            println("Alg: $alg")
             result, negloglik = @btime em($alg, $(dataset.crowd_counts)) seconds=5
-            println("Negative log-likelihood: $negloglik")
+            println("-log(p):\t$(round(negloglik; digits=2))\n")
         end
     end
 end

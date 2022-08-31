@@ -28,18 +28,18 @@ include("dawidskene_utilities.jl")
 ####################################
 
 function m_step(
-    ::ADS,
+    ::AbstractEMAlgorithm,
     counts::AbstractArray{<:Real, 3},
-    question_classes::AbstractArray{<:Real, 2}
+    class_assignments::AbstractArray{<:Real, 2}
 )::Tuple{AbstractArray{<:Real, 2}, AbstractArray{<:Real, 3}} # class_marginals, error_rates
 
-    nQuestions, nParticipants, nClasses = size(counts)
-    class_marginals = sum(question_classes, dims = 1) ./ nQuestions
-    error_rates = zeros(nParticipants, nClasses, nClasses)
-    for k in 1:nParticipants
-        for j in 1:nClasses
-            for l in 1:nClasses
-                error_rates[k, j, l] = question_classes[:, j]' * counts[:, k, l]
+    n_questions, n_participants, n_classes = size(counts)
+    class_marginals = sum(class_assignments, dims = 1) ./ n_questions
+    error_rates = zeros(n_participants, n_classes, n_classes)
+    for k in 1:n_participants
+        for j in 1:n_classes
+            for l in 1:n_classes
+                error_rates[k, j, l] = class_assignments[:, j]' * counts[:, k, l]
             end
             sum_over_responses = sum(error_rates[k, j, :])
             if sum_over_responses > 0
@@ -61,23 +61,23 @@ function e_step(
     counts::AbstractArray{<:Real, 3},
     class_marginals::AbstractArray{<:Real, 2},
     error_rates::AbstractArray{<:Real, 3}
-)::AbstractArray{<:Real, 2} # question_classes / final_classes
+)::AbstractArray{<:Real, 2} # class_assignments / final_class_assignments
 
-    nQuestions, nParticipants, nClasses = size(counts)
-    question_classes = zeros(nQuestions, nClasses)
-    final_classes = zeros(nQuestions, nClasses)
-    for i in 1:nQuestions
-        for j in 1:nClasses
+    n_questions, n_participants, n_classes = size(counts)
+    class_assignments = zeros(n_questions, n_classes)
+    final_class_assignments = zeros(n_questions, n_classes)
+    for i in 1:n_questions
+        for j in 1:n_classes
             estimate = class_marginals[j] * prod(error_rates[:, j, :] .^ counts[i, :, :])
-            question_classes[i, j] = estimate
+            class_assignments[i, j] = estimate
         end
-        _e_step_estimate_classes!(alg, i, question_classes, final_classes)
+        _e_step_estimate_classes!(alg, i, class_assignments, final_class_assignments)
     end
 
     if typeof(alg) ∈ [DS, HDS]
-        return question_classes
+        return class_assignments
     else # FDS / HDS_phase2
-        return final_classes
+        return final_class_assignments
     end
 end
 
@@ -86,26 +86,26 @@ end
 function _e_step_estimate_classes!(
     ::Union{FDS, HDS_phase2},
     i::Int,
-    question_classes::AbstractArray{<:Real, 2},
-    final_classes::AbstractArray{<:Real, 2}
+    class_assignments::AbstractArray{<:Real, 2},
+    final_class_assignments::AbstractArray{<:Real, 2}
 )::Nothing
 
-    maxval = maximum(question_classes[i, :])
-    maxinds = argwhere(question_classes[i, :], ==(maxval))
-    final_classes[i, sample(maxinds, 1)[1]] = 1
+    maxval = maximum(class_assignments[i, :])
+    maxinds = argwhere(class_assignments[i, :], ==(maxval))
+    final_class_assignments[i, sample(maxinds, 1)[1]] = 1
     return
 end
 
 function _e_step_estimate_classes!(
     ::Union{DS, HDS},
     i::Int,
-    question_classes::AbstractArray{<:Real, 2},
-    final_classes::AbstractArray{<:Real, 2}
+    class_assignments::AbstractArray{<:Real, 2},
+    final_class_assignments::AbstractArray{<:Real, 2}
 )::Nothing
 
-    question_sum = sum(question_classes[i, :])
-    if question_sum > 0
-        question_classes[i, :] = question_classes[i, :] / question_sum
+    class_assignments_sum = sum(class_assignments[i, :])
+    if class_assignments_sum > 0
+        class_assignments[i, :] = class_assignments[i, :] / class_assignments_sum
     end
     return
 end
@@ -124,18 +124,23 @@ function em(
     max_iter = 100,
     verbosity::Verbosity = SILENT
 )
+    # History of class assignments
+    class_assignments_history = []
+
     # Initialize
-    question_classes = initialize_question_classes(alg, counts)
+    class_assignments = initialize_class_assignments(alg, counts)
+
     nIter = 0
     converged = false
     old_class_marginals = nothing
     old_error_rates = nothing
     negloglik = nothing
+
     while !converged
         nIter += 1
-        class_marginals, error_rates = m_step(alg, counts, question_classes)
-        question_classes = e_step(alg, counts, class_marginals, error_rates)
-        negloglik = calculate_negloglikelihood(alg, counts, class_marginals, error_rates)
+        class_marginals, error_rates = m_step(alg, counts, class_assignments)
+        class_assignments = e_step(alg, counts, class_marginals, error_rates)
+        negloglik = calculate_negloglikelihood(counts, class_marginals, error_rates)
         
         # Check for convergence
         if old_class_marginals ≠ nothing
@@ -155,11 +160,15 @@ function em(
             @show nIter
             @show negloglik
         end
+        
+        # Update history
+        push!(class_assignments_history, class_assignments)
     end
+
     verbosity != SILENT && @show negloglik
     result = map(
         x -> x[2], 
-        argmax(question_classes, dims = 2)[:])
+        argmax(class_assignments, dims = 2)[:])
     return result, negloglik
 end
 
@@ -167,11 +176,13 @@ end
 function em(
     alg::MV,
     counts::AbstractArray{<:Real, 3};
-    verbose::Verbosity = NORMAL,
+    verbose::Verbosity = SILENT,
     kwargs...
 )
-    question_classes = initialize_question_classes(alg, counts)
-    result = argmax(question_classes, dims = 2)
+    class_assignments = initialize_class_assignments(alg, counts)
+    result = argmax(class_assignments, dims = 2)
+    class_marginals, error_rates = m_step(alg, counts, class_assignments)
+    negloglik = calculate_negloglikelihood(counts, class_marginals, error_rates)
     verbose ≠ SILENT && @show result
-    return result
+    return result, negloglik
 end
