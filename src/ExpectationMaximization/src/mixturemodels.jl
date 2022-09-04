@@ -31,11 +31,11 @@ end
 
 function e_step(alg::KMeans, x::Matrix{<:Real}, θ::θ_KMeans)::r_KMeans
     μ = θ
-    mapslices(xᵢ -> compute_r(alg, xᵢ, μ), x; dims = 2)[:]
+    mapslices(xᵢ -> compute_r(alg, xᵢ, μ), x; dims=2)[:]
 end
 
 function compute_r(::KMeans, xᵢ::Vector{<:Real}, μ::Matrix{<:Real})::Int
-    mapslices(μᵢ -> norm(μᵢ - xᵢ), μ; dims = 2)[:] |> argmin
+    mapslices(μᵢ -> norm(μᵢ - xᵢ), μ; dims=2)[:] |> argmin
 end
 
 function m_step(
@@ -49,9 +49,9 @@ function m_step(
     k = size(μ)[1]
     r_inds = [findall(equals(rᵢ), r) for rᵢ in 1:k]
     new_μ_vecs = [
-        !isempty(inds) ? mean(x[inds, :], dims = 1)[:] : μ[i, :] 
+        !isempty(inds) ? mean(x[inds, :], dims=1)[:] : μ[i, :]
         for (i, inds) in enumerate(r_inds)
-            ]
+    ]
     new_μ_matrix = permutedims(hcat(new_μ_vecs...))
     θ = new_μ_matrix
     return θ
@@ -61,20 +61,20 @@ end
 #             GMM                  #
 ####################################
 
-θ_GMM = Tuple{Vector{<:Real}, Vector{MvNormal}} # Π, MvNormal
+θ_GMM = Tuple{Vector{<:Real},Vector{MvNormal}} # Π, MvNormal
 r_GMM = Matrix{<:Real}
 
 function init_θ(
-    ::GMM, 
-    rng::AbstractRNG, 
-    x::Matrix{<:Real}, 
+    ::GMM,
+    rng::AbstractRNG,
+    x::Matrix{<:Real},
     k::Int
 )::θ_GMM
-    
+
     N, D = size(x)
     μ_inds = randperm(rng, N)[1:k]
     Π = ones(k) / k
-    𝓝 = [MvNormal(x[μ_ind, :], I(D))  for μ_ind in μ_inds]
+    𝓝 = [MvNormal(x[μ_ind, :], I(D)) for μ_ind in μ_inds]
     θ = (Π, 𝓝)
     return θ
 end
@@ -82,7 +82,7 @@ end
 function e_step(alg::GMM, x::Matrix{<:Real}, θ::θ_GMM)::r_GMM
     Π, 𝓝 = θ
     K = length(Π)
-    r = mapslices(xᵢ -> compute_r(alg, xᵢ, Π, 𝓝, K), x; dims = 2)
+    r = mapslices(xᵢ -> compute_r(alg, xᵢ, Π, 𝓝, K), x; dims=2)
     return r
 end
 
@@ -93,18 +93,15 @@ function compute_r(
     𝓝::Vector{MvNormal},
     K::Int
 )::Vector{<:Real}
-    
     r = [Π[k] * pdf(𝓝[k], xᵢ) for k in 1:K]
-    
     sum(r) > 0 && return r / sum(r)
-
     return r
 end
 
 function m_step(
-    ::GMM, 
-    x::Matrix{<:Real}, 
-    r::Matrix{<:Real}, 
+    ::GMM,
+    x::Matrix{<:Real},
+    r::Matrix{<:Real},
     θ::θ_GMM
 )::θ_GMM
 
@@ -122,11 +119,11 @@ end
 
 #TODO: functionalize
 function compute_new_μ(
-    x::Matrix{<:Real}, 
-    r::Matrix{<:Real}, 
-    N::Int, 
-    D::Int, 
-    K::Int, 
+    x::Matrix{<:Real},
+    r::Matrix{<:Real},
+    N::Int,
+    D::Int,
+    K::Int,
     Nₖ::Vector{<:Real}
 )::Matrix{<:Real}
 
@@ -139,22 +136,19 @@ function compute_new_μ(
 end
 
 function compute_new_Σ(
-    x::Matrix{<:Real}, 
-    new_μ::Matrix{<:Real}, 
-    r::Matrix{<:Real}, 
-    N::Int, 
-    K::Int, 
+    x::Matrix{<:Real},
+    new_μ::Matrix{<:Real},
+    r::Matrix{<:Real},
+    N::Int,
+    K::Int,
     Nₖ::Vector{<:Real}
 )::Vector{Matrix{<:Real}}
-    
-    new_Σ = []
-    for k in 1:K
-        new_Σₖ = Hermitian(sum([r[n, k] * (x[n, :] - new_μ[k, :]) * transpose(x[n, :] - new_μ[k, :])  #TODO: tranpose with '
-        for n in 1:N]) / Nₖ[k])
-        push!(new_Σ, convert(Matrix{Float64}, new_Σₖ))
+
+    map(1:K) do k
+        Hermitian(sum([r[n, k] * (x[n, :] - new_μ[k, :]) * transpose(x[n, :] - new_μ[k, :])
+                       for n in 1:N]) / Nₖ[k]
+        ) |> Matrix{Float64}
     end
-    return new_Σ
-    
 end
 
 function compute_new_Π(N::Int, Nₖ::Vector{<:Real})::Vector{<:Real}
@@ -167,11 +161,11 @@ end
 ####################################
 
 function em(
-    alg::AbstractMixtureModel, 
+    alg::AbstractMixtureModel,
     x::Matrix{<:Real};
     k::Int=3,
     n_steps::Int=10
-)::Tuple{Vector, Vector}
+)::Tuple{Vector,Vector}
 
     θ = init_θ(alg, GLOBAL_RNG, x, k)
     r_history = []
