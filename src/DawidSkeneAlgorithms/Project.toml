@@ -1,4 +1,4 @@
-name = "ExpectationMaximization"
+name = "DawidSkeneAlgorithms"
 uuid = "549e6e06-ea84-4a1c-8465-9d79e18916dc"
 authors = ["matthewbaggins <m.baginski@optimumpareto.com>"]
 version = "0.1.0"
@@ -10,6 +10,7 @@ Clustering = "aaaa29a8-35af-508c-8bc3-b662a17a0fe5"
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
 FillArrays = "1a297f60-69ca-5386-bcde-b61e274b549b"
+JLD = "4138dd39-2aa7-5051-a626-17a0bb65d9c8"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 Pipe = "b98c9c47-44ae-5843-9183-064241ee97a0"
 RDatasets = "ce6b1742-4840-55fa-b093-852dadbb1d8b"
