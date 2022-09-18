@@ -149,8 +149,8 @@ function compute_new_Σ(
     
     new_Σ = []
     for k in 1:K
-        new_Σₖ = Hermitian(sum([r[n, k] * (x[n, :] - new_μ[k, :]) * transpose(x[n, :] - new_μ[k, :])  #TODO: tranpose with '
-        for n in 1:N]) / Nₖ[k])
+        new_Σₖ = Hermitian(sum([r[n, k] * (x[n, :] - new_μ[k, :]) * transpose(x[n, :] - new_μ[k, :])
+                           for n in 1:N]) / Nₖ[k])
         push!(new_Σ, convert(Matrix{Float64}, new_Σₖ))
     end
     return new_Σ
