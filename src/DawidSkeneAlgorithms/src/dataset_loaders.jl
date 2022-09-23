@@ -2,6 +2,10 @@
 
 abstract type AbstractDataset end
 
+const DATA_PATH = rsplit(pathof(DawidSkeneAlgorithms), '/'; limit=3)[1] * "/data"
+const DATA_CLUSTERING_PATH = DATA_PATH * "/clustering"
+const DATA_VOTING_PATH = DATA_PATH * "/voting"
+
 function show(io::IO, d::AbstractDataset)
     println(io,
         """$(typeof(d)) $(d.name)
@@ -27,7 +31,7 @@ function load_iris()::ClusteringDataset
 end
 
 function load_beans()::ClusteringDataset
-    beans = CSV.read("data/beans.csv", DataFrame)
+    beans = CSV.read("$DATA_CLUSTERING_PATH/beans.csv", DataFrame)
     ClusteringDataset(
         "beans",
         select(beans, Not(:Class)) |> Matrix,
@@ -35,7 +39,7 @@ function load_beans()::ClusteringDataset
 end
 
 function load_stars()::ClusteringDataset
-    stars = CSV.read("data/stars.csv", DataFrame)
+    stars = CSV.read("$DATA_CLUSTERING_PATH/stars.csv", DataFrame)
     ClusteringDataset(
         "stars",
         select(stars, Not(5, 6, 7)) |> Matrix,
@@ -53,27 +57,12 @@ struct VotingDataset <: AbstractDataset
 end
 
 function load_adult2()::VotingDataset
-    VotingDataset(
-        "Adult2",
-        load("data/adult2_dataset/crowd_counts.jld")["crowd_counts"],
-        CSV.read("data/adult2_dataset/gold.csv", DataFrame, header=false)[!, 2] |> Vector |> tocategorical
-    )
+    load("$DATA_VOTING_PATH/adult2.jld")["adult2"]
 end
 
 function load_rte()::VotingDataset
-    VotingDataset(
-        "RTE",
-        load("data/rte_dataset/crowd_counts.jld")["crowd_counts"],
-        CSV.read("data/rte_dataset/gold.csv", DataFrame, header=false)[!, 2]
-    )
+    load("$DATA_VOTING_PATH/rte.jld")["rte"]
 end
 
-function load_toy()::VotingDataset
-    VotingDataset(
-        "toy",
-        load("data/toy_dataset/crowd_counts.jld")["crowd_counts"],
-        CSV.read("data/toy_dataset/gold.csv", DataFrame, header=false)[!, 2] |> tocategorical
-    )
-end
 
 load_voting_datasets() = [load_adult2(), load_rte()]

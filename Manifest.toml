@@ -268,6 +268,12 @@ version = "1.0.0"
 deps = ["Printf"]
 uuid = "ade2ca70-3891-5945-98fb-dc099432e06a"
 
+[[deps.DawidSkeneAlgorithms]]
+deps = ["CSV", "CategoricalArrays", "Clustering", "DataFrames", "Distributions", "FillArrays", "JLD", "LinearAlgebra", "Pipe", "RDatasets", "Random", "Revise", "Statistics", "StatsBase", "Test"]
+path = "src/DawidSkeneAlgorithms"
+uuid = "549e6e06-ea84-4a1c-8465-9d79e18916dc"
+version = "0.1.0"
+
 [[deps.Debugger]]
 deps = ["CodeTracking", "Crayons", "Highlights", "InteractiveUtils", "JuliaInterpreter", "Markdown", "REPL"]
 git-tree-sha1 = "2e1376ac793d255c8a312a99b961ef64ae60ffee"
@@ -367,12 +373,6 @@ deps = ["AbstractMCMC", "ArrayInterfaceCore", "Distributions", "Random", "Statis
 git-tree-sha1 = "4cda4527e990c0cc201286e0a0bfbbce00abcfc2"
 uuid = "cad2338a-1db2-11e9-3401-43bc07c9ede2"
 version = "1.0.0"
-
-[[deps.DawidSkeneAlgorithms]]
-deps = ["CSV", "CategoricalArrays", "Clustering", "DataFrames", "Distributions", "FillArrays", "LinearAlgebra", "Pipe", "RDatasets", "Random", "Revise", "Statistics", "StatsBase", "Test"]
-path = "src/DawidSkeneAlgorithms"
-uuid = "549e6e06-ea84-4a1c-8465-9d79e18916dc"
-version = "0.1.0"
 
 [[deps.ExprTools]]
 git-tree-sha1 = "56559bbef6ca5ea0c0818fa5c90320398a6fbf8d"

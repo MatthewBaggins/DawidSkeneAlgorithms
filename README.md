@@ -19,6 +19,10 @@ julia scripts/test_mixturemodels.jl
   - One can see that results are similar to those published in the [paper](http://sentic.net/wisdom2018sinha.pdf) (tables 1 and 2; see also the [showcase notebook](./notebooks/showcase.ipynb)).
 - [test_mixturemodels.jl](scripts/test_mixturemodels.jl) - test runs and compares EM implementations of two clustering algorithms, [k-means](https://en.wikipedia.org/wiki/K-means_clustering) and [gaussian mixture models](https://en.wikipedia.org/wiki/Mixture_model#Gaussian_mixture_model) (also with `@btime`)
 
+## Tests
+
+- [runtests.jl](src/DawidSkeneAlgorithms/test/runtests.jl) - uses the standard [`Test`](https://docs.julialang.org/en/v1/stdlib/Test/) to validate that the algorithms work correctly.
+
 ## Jupyter notebooks
 
 - [showcase.ipynb](./notebooks/showcase.ipynb) - explains this implementation of EM-FDS step-by-step.
